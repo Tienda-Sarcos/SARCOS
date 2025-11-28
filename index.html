@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-title" content="Catálogo Sarco's">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3097/3097022.png">
+
+    <title>Sarco's - Catálogo y Ventas</title>
+    
+    <style>
+        /* --- ESTILOS GENERALES --- */
+        html { height: 100%; overflow: hidden; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background-color: #f0f2f5; margin: 0; padding: 0; height: 100%; 
+            overflow-y: auto; -webkit-overflow-scrolling: touch; 
+        }
+
+        /* --- BARRA DE NAVEGACIÓN --- */
+        .navbar { 
+            background-color: #333; 
+            position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
+            padding-top: env(safe-area-inset-top);
+            display: flex; align-items: center; justify-content: space-between; padding-right: 15px; 
+        }
+        .navbar button { 
+            background-color: inherit; flex-grow: 1; border: none; outline: none; cursor: pointer; padding: 14px 10px; 
+            transition: 0.3s; font-size: 16px; color: white; font-weight: bold; white-space: nowrap; 
+        }
+        .navbar button:hover, .navbar button.active { background-color: #FFC107; color: #000; }
+        .profile-icon { width: 40px; height: 40px; border-radius: 50%; margin-left: 10px; border: 2px solid #FFC107; object-fit: cover; background-color: #FFC107; display: block; }
+
+        /* --- CONTENIDO --- */
+        .tab-content { display: none; padding: 20px; animation: fadeEffect 0.5s; padding-bottom: 100px;}
+        @keyframes fadeEffect { from {opacity: 0;} to {opacity: 1;} }
+        
+        /* --- CATÁLOGO --- */
+        .catalogo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; max-width: 1200px; margin: auto; }
+        .moto-card { background: white; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow: hidden; transition: transform 0.2s; border: 1px solid #ddd; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .moto-card:active { transform: scale(0.98); }
+        .moto-img { width: 100%; height: 200px; object-fit: cover; background-color: #eee; }
+        .card-body { padding: 15px; }
+        .moto-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 5px; }
+        .click-hint { font-size: 12px; color: #888; margin-bottom: 10px; font-style: italic; } 
+        .price-container { margin-top: 10px; }
+        .price-normal { font-size: 22px; font-weight: bold; color: #d32f2f; }
+        
+        /* ESTILO PRECIO BORROSO */
+        .price-min {
+            font-size: 13px; color: #d32f2f; margin-top: 5px; cursor: pointer; padding: 4px 8px; border-radius: 5px;
+            display: inline-block; font-weight: bold; transition: all 0.3s ease; border: 1px dashed #ccc;
+        }
+        .borroso {
+            color: transparent !important; text-shadow: 0 0 8px rgba(0,0,0,0.5); background-color: #e0e0e0;
+            user-select: none; border: 1px solid transparent;
+        }
+
+        /* --- CALCULADORA --- */
+        .calc-container { display: flex; justify-content: center; }
+        .card-calc { background-color: white; width: 100%; max-width: 450px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; padding-bottom: 20px; }
+        .header-calc { background-color: #FFC107; color: white; text-align: center; padding: 30px 20px 50px 20px; font-size: 22px; font-weight: bold; border-bottom-left-radius: 50% 20px; border-bottom-right-radius: 50% 20px; margin-bottom: 20px; }
+        .list-item { display: flex; align-items: center; padding: 10px 20px; font-size: 16px; color: #333; }
+        .circle { background-color: #FFC107; color: white; width: 25px; height: 25px; font-size: 14px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; margin-right: 10px; flex-shrink: 0; }
+        input[type="number"], select { width: 100px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; margin-left: auto; background: white; appearance: none; -webkit-appearance: none; }
+        .label { font-weight: 500; }
+        .resultado-final { font-weight: bold; font-size: 18px; }
+        .moto-seleccionada { text-align: center; color: #666; font-style: italic; margin-bottom: 10px; height: 20px; font-size: 14px;}
+        .btn-grande { width: 100%; padding: 15px; background: #333; color: white; border: none; border-radius: 10px; font-size: 18px; cursor: pointer; font-weight: bold; appearance: none; -webkit-appearance: none; }
+        .btn-grande:active { background: #000; transform: scale(0.98); }
+
+        /* --- MODALES --- */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); align-items: center; justify-content: center; }
+        .modal-content { background-color: #fff; margin: auto; padding: 0; border-radius: 15px; width: 90%; max-width: 500px; position: relative; animation: slideUp 0.4s; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        @keyframes slideUp { from {transform: translateY(50px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
+        
+        .modal-header { background: #FFC107; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-size: 20px; font-weight: bold; color: #000; }
+        .close-btn { color: #000; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 20px;}
+        .modal-body { padding: 20px; max-height: 60vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .modal-footer { padding: 15px 20px; background: #f9f9f9; text-align: center; border-top: 1px solid #eee; }
+        
+        .modal-img { width: 100%; height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 20px; }
+        .specs-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;}
+        .specs-table td { padding: 8px; border-bottom: 1px solid #eee; }
+        .specs-table td:first-child { font-weight: bold; color: #555; width: 40%; }
+        .specs-table tr:last-child td { border-bottom: none; }
+
+        /* --- INPUT CELULAR --- */
+        .input-group-whatsapp { display: flex; align-items: center; border: 2px solid #ddd; border-radius: 10px; padding: 5px; margin-bottom: 20px; background: white; }
+        .flag-prefix { display: flex; align-items: center; padding: 10px; background: #f0f0f0; border-radius: 8px; font-weight: bold; color: #333; margin-right: 10px; }
+        .flag-icon { font-size: 20px; margin-right: 5px; }
+        .input-phone { border: none; outline: none; font-size: 18px; width: 100%; padding: 10px 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <button class="tablinks active" onclick="abrirPestana(event, 'Catalogo')">🏍️ CATÁLOGO</button>
+        <button class="tablinks" onclick="abrirPestana(event, 'Calculadora')" id="btnCalculadora">🔢 CALCULADORA</button>
+        <img src="https://placehold.co/100/FFC107/ffffff?text=Sarco's&font=roboto" class="profile-icon" alt="Perfil">
+    </div>
+
+    <div id="Catalogo" class="tab-content" style="display: block;">
+        <div class="catalogo-grid" id="gridMotos"></div>
+    </div>
+
+    <div id="Calculadora" class="tab-content">
+        <div class="calc-container">
+            <div class="card-calc">
+                <div class="header-calc">Comparta su propuesta :</div>
+                <div class="moto-seleccionada" id="nombreMotoSel">(Seleccione una moto)</div>
+
+                <div class="list-item"><div class="circle">1</div><span class="label">Precio al Contado: S/.</span><input type="number" id="costo" value="0" oninput="calcular()"></div>
+                <div class="list-item"><div class="circle">2</div><span class="label">Monto Inicial: S/.</span><input type="number" id="inicial" value="0" oninput="calcular()"></div>
+                <div class="list-item"><div class="circle">3</div><span class="label">Numero de Cuotas: #</span><input type="number" id="cuotas" value="12" oninput="calcular()"></div>
+                <div class="list-item">
+                    <div class="circle">4</div><span class="label">Tiempo de Pago: </span>
+                    <select id="frecuencia" onchange="calcular()">
+                        <option value="1">Mensual</option>
+                        <option value="2">Quincenal</option>
+                        <option value="4">Semanal</option>
+                    </select>
+                </div>
+                <div class="list-item"><div class="circle">5</div><span class="label">Monto de Interes: %</span><input type="number" id="interes" value="4.5" oninput="calcular()"></div>
+                
+                <div class="list-item">
+                    <div class="circle">6</div>
+                    <span class="label resultado-final">Por Cuotas: S/.</span>
+                    <span id="resultadoCuota" class="resultado-final" style="margin-left: auto;">0</span>
+                </div>
+                
+                <div class="list-item">
+                    <div class="circle">7</div>
+                    <span class="label resultado-final">Total: S/.</span>
+                    <span id="resultadoTotal" class="resultado-final" style="margin-left: auto;">0</span>
+                </div>
+
+                <div style="padding: 20px; text-align: center;">
+                    <button class="btn-grande" onclick="abrirModalShare()">Compartir Propuesta</button>
+                    <br><br>
+                    <button onclick="abrirPestana(event, 'Catalogo')" style="background: none; border: none; color: #666; cursor: pointer; text-decoration: underline;">← Volver al Catálogo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title" id="modalTitle">Nombre Moto</span>
+                <span class="close-btn" onclick="cerrarModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <img src="" id="modalImg" class="modal-img">
+                <table class="specs-table" id="modalSpecs"></table>
+                <div class="price-container" style="text-align: center;">
+                    <div class="price-normal" id="modalPrice"></div>
+                    <div class="price-min borroso" id="modalPriceMin" onclick="togglePrecio(event, this)"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-grande" id="btnCotizarModal">COTIZAR AHORA</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Enviar a WhatsApp</span>
+                <span class="close-btn" onclick="cerrarModalShare()">&times;</span>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <p style="font-size: 16px; color: #555; margin-bottom: 20px;">
+                    Ingresa el número del cliente para enviar la propuesta formal:
+                </p>
+                <div class="input-group-whatsapp">
+                    <div class="flag-prefix"><span class="flag-icon">🇵🇪</span> +51</div>
+                    <input type="tel" id="whatsappNumber" class="input-phone" placeholder="999 999 999">
+                </div>
+                <p style="font-size: 12px; color: #999;">*Se enviará la cotización completa SIN mostrar la tasa de interés.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-grande" style="background-color: #25D366;" onclick="enviarPropuesta()">🚀 ENVIAR</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- BASE DE DATOS DE MOTOS ---
+        const dbMotos = [
+            { 
+                id: 1, nombre: "REZZIO WAZE 125-H", precio: 4100, minimo: 3900, img: "https://i.imgur.com/g64fjJl.jpeg?1", 
+                specs: { "Motor": "125cc OHC 4 Tiempos", "Transmisión": "Automática (CVT)", "Encendido": "Eléctrico y Pedal", "Tanque": "5.5 Litros", "Frenos": "Disco Delantero / Tambor Trasero", "Rendimiento": "140 km/galón (aprox)", "Extras": "Parrilla trasera, tablero análogo" } 
+            },
+            { 
+                id: 2, nombre: "REZZIO SPARK 125", precio: 4400, minimo: 4200, img: "https://i.imgur.com/SVc2biZ.png", 
+                specs: { "Motor": "125cc OHC", "Transmisión": "Semiautomática", "Encendido": "Eléctrico/Pedal", "Tanque": "8 Litros", "Frenos": "Disco/Tambor", "Suspensión": "Reforzada", "Extras": "MP3 Bluetooth, Parrilla" } 
+            },
+            { 
+                id: 3, nombre: "JIALING TERRA 125", precio: 5100, minimo: 4900, img: "https://i.imgur.com/cVQD907.png", 
+                specs: { "Motor": "125cc Monocilíndrico", "Estilo": "Todo Terreno / Enduro", "Transmisión": "Mecánica 5 Velocidades", "Tanque": "11 Litros", "Suspensión": "Horquilla telescópica alta", "Frenos": "Disco lobulado / Tambor", "Peso": "115 kg (Ligera)" } 
+            },
+            { 
+                id: 4, nombre: "JCH TITAN 200 SUPERCROSS", precio: 5700, minimo: 5500, img: "https://i.imgur.com/dWYn88M.png", 
+                specs: { "Motor": "200cc CG Cadenero", "Transmisión": "Mecánica 5 Velocidades", "Tanque": "12 Litros", "Suspensión Del": "Barras Invertidas Doradas", "Suspensión Post": "Monoshock", "Frenos": "Disco en ambas ruedas", "Extras": "Protector de manos, tubo deportivo" } 
+            },
+            { 
+                id: 5, nombre: "JCH MT200", precio: 6600, minimo: 6400, img: "https://i.imgur.com/vXyJ0y8.png", 
+                specs: { "Motor": "200cc Balanceado (Sin vibración)", "Estilo": "Naked / Deportiva", "Tablero": "100% Digital", "Tanque": "14 Litros", "Iluminación": "Full LED Integral", "Transmisión": "5 Velocidades", "Llantas": "Aleación deportiva" } 
+            },
+            { 
+                id: 6, nombre: "REZZIO RZ200 LITHIUM", precio: 9100, minimo: 8900, img: "https://i.imgur.com/V6GoW8l.png", 
+                specs: { "Motor": "200cc Inyección o Carburada", "Refrigeración": "Radiador de Aceite", "Transmisión": "6 Velocidades", "Tanque": "15 Litros", "Tecnología": "Encendido a distancia / Alarma", "Frenos": "Doble disco delantero", "Velocidad Max": "125 km/h" } 
+            },
+            { 
+                id: 7, nombre: "RONCO TRAKTOR 300P", precio: 14700, minimo: 14500, img: "https://i.imgur.com/PGITm8B.jpeg?1", 
+                specs: { "Motor": "300cc OHV enfriado por Agua", "Carga Útil": "1000 kg - 1200 kg", "Transmisión": "Mecánica 5 vel + Reversa", "Tanque": "16 Litros", "Tracción": "Cardán con Rooster (Dual)", "Llantas": "Posteriores Doble Llanta", "Extras": "Tolva levadiza hidráulica (opcional)" } 
+            }
+        ];
+
+        // --- RENDERIZADO DEL CATÁLOGO ---
+        const grid = document.getElementById('gridMotos');
+        dbMotos.forEach(moto => {
+            let card = document.createElement('div'); card.className = 'moto-card';
+            card.onclick = function() { verDetalleMoto(moto.id); };
+            card.innerHTML = `
+                <img src="${moto.img}" class="moto-img">
+                <div class="card-body">
+                    <div class="moto-title">${moto.nombre}</div>
+                    <div class="click-hint">👆 Toca para ver Ficha Técnica</div>
+                    <div class="price-container">
+                        <div class="price-normal">S/. ${moto.precio.toLocaleString('en-US')}</div>
+                        <div class="price-min borroso" onclick="togglePrecio(event, this)">Min: S/. ${moto.minimo.toLocaleString('en-US')} 🔒</div>
+                    </div>
+                </div>`;
+            grid.appendChild(card);
+        });
+
+        function togglePrecio(event, elemento) { event.stopPropagation(); elemento.classList.toggle("borroso"); }
+
+        // --- FUNCIONES MODALES ---
+        const modal = document.getElementById("myModal");
+        const shareModal = document.getElementById("shareModal");
+        
+        function verDetalleMoto(id) {
+            const moto = dbMotos.find(m => m.id === id);
+            document.getElementById('modalTitle').innerText = moto.nombre;
+            document.getElementById('modalImg').src = moto.img;
+            document.getElementById('modalPrice').innerText = "S/. " + moto.precio.toLocaleString('en-US');
+            
+            const minPriceEl = document.getElementById('modalPriceMin');
+            minPriceEl.innerText = "Min: S/. " + moto.minimo.toLocaleString('en-US') + " 🔒";
+            minPriceEl.classList.add("borroso");
+
+            const tabla = document.getElementById('modalSpecs'); tabla.innerHTML = ""; 
+            for (const [key, value] of Object.entries(moto.specs)) { let row = `<tr><td>${key}:</td><td>${value}</td></tr>`; tabla.innerHTML += row; }
+            document.getElementById('btnCotizarModal').onclick = function() { cerrarModal(); enviarACalculadora(moto.nombre, moto.precio); };
+            modal.style.display = "flex";
+        }
+        
+        function cerrarModal() { modal.style.display = "none"; }
+        function abrirModalShare() { shareModal.style.display = "flex"; setTimeout(() => document.getElementById('whatsappNumber').focus(), 100); }
+        function cerrarModalShare() { shareModal.style.display = "none"; }
+        
+        window.onclick = function(event) { 
+            if (event.target == modal) { modal.style.display = "none"; }
+            if (event.target == shareModal) { shareModal.style.display = "none"; }
+        }
+
+        // --- NAVEGACIÓN Y CÁLCULOS ---
+        function abrirPestana(evt, pestanaName) {
+            var i, tabcontent, tablinks; tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) tabcontent[i].style.display = "none";
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) tablinks[i].className = tablinks[i].className.replace(" active", "");
+            document.getElementById(pestanaName).style.display = "block";
+            if(evt) evt.currentTarget.className += " active"; else if(pestanaName === 'Calculadora') document.getElementById('btnCalculadora').className += " active";
+            window.scrollTo(0, 0);
+        }
+
+        function enviarACalculadora(nombre, precio) {
+            document.getElementById('nombreMotoSel').innerText = "Cotizando: " + nombre;
+            document.getElementById('costo').value = precio; document.getElementById('inicial').value = 0; 
+            abrirPestana(null, 'Calculadora'); calcular();
+        }
+
+        function formatearMoneda(numero) {
+            return parseFloat(numero).toLocaleString('en-US');
+        }
+
+        function calcular() {
+            let costo = parseFloat(document.getElementById('costo').value) || 0;
+            let inicial = parseFloat(document.getElementById('inicial').value) || 0;
+            let numCuotas = parseInt(document.getElementById('cuotas').value) || 1;
+            let tasaInteresMensual = parseFloat(document.getElementById('interes').value) || 0;
+            let factorFrecuencia = parseInt(document.getElementById('frecuencia').value);
+
+            let capitalFinanciar = costo - inicial; if (capitalFinanciar < 0) capitalFinanciar = 0;
+            let mesesReales = numCuotas / factorFrecuencia;
+            let totalInteres = capitalFinanciar * (tasaInteresMensual / 100) * mesesReales;
+            let totalFinanciado = capitalFinanciar + totalInteres;
+            let valorCuotaExacto = totalFinanciado / numCuotas;
+            let valorCuotaRedondeado = Math.round(valorCuotaExacto);
+            let totalFinalReal = (valorCuotaRedondeado * numCuotas) + inicial;
+
+            document.getElementById('resultadoCuota').innerText = formatearMoneda(valorCuotaRedondeado); 
+            document.getElementById('resultadoTotal').innerText = formatearMoneda(totalFinalReal);
+        }
+
+        function enviarPropuesta() {
+            let numero = document.getElementById('whatsappNumber').value.trim();
+            if (numero.length < 9) { alert("Por favor ingresa un número válido."); return; }
+
+            let moto = document.getElementById('nombreMotoSel').innerText.replace("Cotizando: ", "");
+            let precio = formatearMoneda(document.getElementById('costo').value);
+            let inicial = formatearMoneda(document.getElementById('inicial').value);
+            let cuotas = document.getElementById('cuotas').value;
+            let selectFrecuencia = document.getElementById('frecuencia');
+            let textoFrecuencia = selectFrecuencia.options[selectFrecuencia.selectedIndex].text;
+            let valorCuota = document.getElementById('resultadoCuota').innerText;
+            let totalFinal = document.getElementById('resultadoTotal').innerText;
+
+            let mensaje = `👋 *Hola! Aquí tienes tu propuesta de Sarco's Motos* 🏍️%0A%0A`;
+            mensaje += `🛵 *Modelo:* ${moto}%0A`;
+            mensaje += `💰 *Precio:* S/. ${precio}%0A`;
+            mensaje += `💵 *Inicial:* S/. ${inicial}%0A`;
+            mensaje += `📅 *Plan:* ${cuotas} Cuotas (${textoFrecuencia})%0A`;
+            mensaje += `✅ *Cuota a Pagar:* S/. ${valorCuota}%0A`;
+            mensaje += `🏁 *Total Final:* S/. ${totalFinal}%0A%0A`;
+            mensaje += `📍 *Visítanos y llévatela hoy mismo!*`;
+
+            let url = `https://wa.me/51${numero}?text=${mensaje}`;
+            window.open(url, '_blank');
+            cerrarModalShare();
+        }
+    </script>
+</body>
+</html>
