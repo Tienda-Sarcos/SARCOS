@@ -428,13 +428,11 @@
             let totalFinal = document.getElementById('resultadoTotal').innerText;
 
             let mensaje = `👋 *Hola! Aquí tienes tu propuesta de Sarco's Motos* 🏍️%0A%0A`;
-            mensaje += ` `;
             mensaje += `🛵 *Modelo:* ${moto}%0A`;
             mensaje += `💰 *Precio:* S/. ${precio}%0A`;
             mensaje += `💵 *Inicial:* S/. ${inicial}%0A`;
             mensaje += `📅 *Plan:* ${cuotas} Cuotas (${textoFrecuencia})%0A`;
-            mensaje += `✅ *Cuota a Pagar:* S/. ${valorCuota}%0A`;
-            mensaje += ` `;
+            mensaje += `✅ *Cuota a Pagar:* S/. ${valorCuota}%0A%0A`;
             mensaje += `📍 *Visítanos y llévatela hoy mismo!*`;
 
             let url = `https://wa.me/51${numero}?text=${mensaje}`;
@@ -444,3 +442,4 @@
     </script>
 </body>
 </html>
+
