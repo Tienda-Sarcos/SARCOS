@@ -88,24 +88,11 @@
         .specs-table td:first-child { font-weight: bold; color: #555; width: 40%; }
         .specs-table tr:last-child td { border-bottom: none; }
 
-        /* --- INPUT CELULAR Y BOTÓN DE PEGAR --- */
+        /* --- INPUT CELULAR LIMPIO --- */
         .input-group-whatsapp { display: flex; align-items: center; border: 2px solid #ddd; border-radius: 10px; padding: 5px; margin-bottom: 20px; background: white; }
         .flag-prefix { display: flex; align-items: center; padding: 10px; background: #f0f0f0; border-radius: 8px; font-weight: bold; color: #333; margin-right: 10px; }
         .flag-icon { font-size: 20px; margin-right: 5px; }
         .input-phone { border: none; outline: none; font-size: 18px; width: 100%; padding: 10px 5px; }
-        
-        /* Botón pequeño para pegar */
-        .btn-paste {
-            background-color: #6c757d;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 15px;
-            font-size: 14px;
-            cursor: pointer;
-            margin-left: 5px;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
@@ -188,14 +175,11 @@
             </div>
             <div class="modal-body" style="text-align: center;">
                 <p style="font-size: 16px; color: #555; margin-bottom: 20px;">
-                    Ingresa el número del cliente:
+                    Ingresa el número del cliente para enviar la propuesta formal:
                 </p>
                 <div class="input-group-whatsapp">
                     <div class="flag-prefix"><span class="flag-icon">🇵🇪</span> +51</div>
-                    
                     <input type="tel" id="whatsappNumber" class="input-phone" placeholder="999 999 999" autocomplete="tel">
-                    
-                    <button class="btn-paste" onclick="pegarNumero()" title="Pegar número copiado">📋</button>
                 </div>
                 <p style="font-size: 12px; color: #999;">*Se enviará la cotización completa SIN mostrar la tasa de interés.</p>
             </div>
@@ -378,12 +362,10 @@
         }
         
         function cerrarModal() { modal.style.display = "none"; }
-        
         function abrirModalShare() { 
             shareModal.style.display = "flex"; 
             setTimeout(() => document.getElementById('whatsappNumber').focus(), 100); 
         }
-
         function cerrarModalShare() { shareModal.style.display = "none"; }
         
         window.onclick = function(event) { 
@@ -431,25 +413,6 @@
             document.getElementById('resultadoTotal').innerText = formatearMoneda(totalFinalReal);
         }
 
-        /* --- LÓGICA DE PEGAR (Portapapeles) --- */
-        async function pegarNumero() {
-            try {
-                // Intentamos leer el portapapeles
-                const text = await navigator.clipboard.readText();
-                if(text) {
-                    let numero = text.replace(/\D/g,''); 
-                    if(numero.startsWith('51')) { numero = numero.substring(2); }
-                    document.getElementById('whatsappNumber').value = numero;
-                } else {
-                    alert("El portapapeles está vacío.");
-                }
-            } catch (err) {
-                // Si la App bloquea el portapapeles (muy probable en WebViews)
-                alert("Para pegar, mantén presionado el espacio blanco.");
-                document.getElementById('whatsappNumber').focus();
-            }
-        }
-
         function enviarPropuesta() {
             let numero = document.getElementById('whatsappNumber').value.trim();
             numero = numero.replace(/\s/g, '');
@@ -471,7 +434,6 @@
             mensaje += `💵 *Inicial:* S/. ${inicial}%0A`;
             mensaje += `📅 *Plan:* ${cuotas} Cuotas (${textoFrecuencia})%0A`;
             mensaje += `✅ *Cuota a Pagar:* S/. ${valorCuota}%0A`;
-            mensaje += `🏁 *Total Final:* S/. ${totalFinal}%0A%0A`;
             mensaje += ` `;
             mensaje += `📍 *Visítanos y llévatela hoy mismo!*`;
 
