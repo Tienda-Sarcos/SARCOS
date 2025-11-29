@@ -88,11 +88,23 @@
         .specs-table td:first-child { font-weight: bold; color: #555; width: 40%; }
         .specs-table tr:last-child td { border-bottom: none; }
 
-        /* --- INPUT CELULAR --- */
+        /* --- INPUT CELULAR Y BOTÓN DE CONTACTOS --- */
         .input-group-whatsapp { display: flex; align-items: center; border: 2px solid #ddd; border-radius: 10px; padding: 5px; margin-bottom: 20px; background: white; }
         .flag-prefix { display: flex; align-items: center; padding: 10px; background: #f0f0f0; border-radius: 8px; font-weight: bold; color: #333; margin-right: 10px; }
         .flag-icon { font-size: 20px; margin-right: 5px; }
         .input-phone { border: none; outline: none; font-size: 18px; width: 100%; padding: 10px 5px; }
+        
+        /* Botón pequeño para abrir contactos */
+        .btn-contacts {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -175,11 +187,12 @@
             </div>
             <div class="modal-body" style="text-align: center;">
                 <p style="font-size: 16px; color: #555; margin-bottom: 20px;">
-                    Ingresa el número del cliente para enviar la propuesta formal:
+                    Ingresa o busca el número del cliente:
                 </p>
                 <div class="input-group-whatsapp">
                     <div class="flag-prefix"><span class="flag-icon">🇵🇪</span> +51</div>
                     <input type="tel" id="whatsappNumber" class="input-phone" placeholder="999 999 999">
+                    <button class="btn-contacts" onclick="abrirAgenda()" title="Buscar en Contactos">📒</button>
                 </div>
                 <p style="font-size: 12px; color: #999;">*Se enviará la cotización completa SIN mostrar la tasa de interés.</p>
             </div>
@@ -193,32 +206,131 @@
         // --- BASE DE DATOS DE MOTOS ---
         const dbMotos = [
             { 
-                id: 1, nombre: "REZZIO WAZE 125-H", precio: 4100, minimo: 3900, img: "https://i.imgur.com/g64fjJl.jpeg?1", 
-                specs: { "Motor": "125cc OHC 4 Tiempos", "Transmisión": "Automática (CVT)", "Encendido": "Eléctrico y Pedal", "Tanque": "5.5 Litros", "Frenos": "Disco Delantero / Tambor Trasero", "Rendimiento": "140 km/galón (aprox)", "Extras": "Parrilla trasera, tablero análogo" } 
+                id: 1, 
+                nombre: "REZZIO WAZE 125-H", 
+                precio: 4100, 
+                minimo: 3900, 
+                img: "https://i.imgur.com/g64fjJl.jpeg?1", 
+                specs: { 
+                    "Motor": "125cc OHC 4 Tiempos", 
+                    "Transmisión": "Automática (CVT) - Sin cambios", 
+                    "Potencia": "8.5 HP @ 7500 RPM",
+                    "Encendido": "Eléctrico y Pedal de emergencia", 
+                    "Tanque": "5.5 Litros (Económica)", 
+                    "Rendimiento": "140 km/galón (aprox)", 
+                    "Frenos": "Disco Delantero / Tambor Trasero", 
+                    "Llantas": "Aro 10'' Tubeless (Sin cámara)",
+                    "Tecnología": "Puerto USB para cargar celular",
+                    "Extras": "Parrilla trasera, Cajuela bajo asiento" 
+                } 
             },
             { 
-                id: 2, nombre: "REZZIO SPARK 125", precio: 4400, minimo: 4200, img: "https://i.imgur.com/SVc2biZ.png", 
-                specs: { "Motor": "125cc OHC", "Transmisión": "Semiautomática", "Encendido": "Eléctrico/Pedal", "Tanque": "8 Litros", "Frenos": "Disco/Tambor", "Suspensión": "Reforzada", "Extras": "MP3 Bluetooth, Parrilla" } 
+                id: 2, 
+                nombre: "REZZIO SPARK 125", 
+                precio: 4400, 
+                minimo: 4200, 
+                img: "https://placehold.co/500x300/red/white?text=REZZIO+SPARK+125", 
+                specs: { 
+                    "Motor": "125cc OHC Monocilíndrico", 
+                    "Transmisión": "Semiautomática 4 Velocidades (Sin embrague)", 
+                    "Enfriamiento": "Aire forzado",
+                    "Encendido": "Eléctrico y Pedal", 
+                    "Tanque": "8 Litros", 
+                    "Frenos": "Disco Ventilado / Tambor", 
+                    "Suspensión": "Amortiguadores traseros reforzados", 
+                    "Multimedia": "Sistema MP3 con Bluetooth y Radio FM",
+                    "Extras": "Canastilla central, Parrilla de carga, Tapamanos" 
+                } 
             },
             { 
-                id: 3, nombre: "JIALING TERRA 125", precio: 5100, minimo: 4900, img: "https://i.imgur.com/cVQD907.png", 
-                specs: { "Motor": "125cc Monocilíndrico", "Estilo": "Todo Terreno / Enduro", "Transmisión": "Mecánica 5 Velocidades", "Tanque": "11 Litros", "Suspensión": "Horquilla telescópica alta", "Frenos": "Disco lobulado / Tambor", "Peso": "115 kg (Ligera)" } 
+                id: 3, 
+                nombre: "JIALING TERRA 125", 
+                precio: 5100, 
+                minimo: 4900, 
+                img: "https://i.imgur.com/cVQD907.png", 
+                specs: { 
+                    "Motor": "125cc OHV (Varillero) Alto Torque", 
+                    "Estilo": "Todo Terreno / Enduro / Chacra", 
+                    "Transmisión": "Mecánica 5 Velocidades", 
+                    "Tanque": "11 Litros (Reserva incluida)", 
+                    "Suspensión Del": "Horquilla telescópica protegida", 
+                    "Suspensión Post": "Monoshock central",
+                    "Frenos": "Disco lobulado / Tambor", 
+                    "Llantas": "Con tocos (Mixtas) para trocha",
+                    "Peso": "115 kg (Super Ligera y Ágil)" 
+                } 
             },
             { 
-                id: 4, nombre: "JCH TITAN 200 SUPERCROSS", precio: 5700, minimo: 5500, img: "https://i.imgur.com/dWYn88M.png", 
-                specs: { "Motor": "200cc CG Cadenero", "Transmisión": "Mecánica 5 Velocidades", "Tanque": "12 Litros", "Suspensión Del": "Barras Invertidas Doradas", "Suspensión Post": "Monoshock", "Frenos": "Disco en ambas ruedas", "Extras": "Protector de manos, tubo deportivo" } 
+                id: 4, 
+                nombre: "JCH TITAN 200 SUPERCROSS", 
+                precio: 5700, 
+                minimo: 5500, 
+                img: "https://i.imgur.com/dWYn88M.png", 
+                specs: { 
+                    "Motor": "200cc CG (Varillero) Potenciado", 
+                    "Transmisión": "Mecánica 5 Velocidades", 
+                    "Tanque": "12 Litros Diseño Cross", 
+                    "Suspensión Del": "Barras Invertidas Doradas (Mayor rebote)", 
+                    "Suspensión Post": "Monoshock Regulable", 
+                    "Frenos": "Disco en ambas ruedas (Delantero/Trasero)", 
+                    "Escape": "Tubo deportivo con resonador",
+                    "Extras": "Protector de manos (Handguards), Timón ProTaper",
+                    "Uso": "Ideal para cerro, trocha y aventura"
+                } 
             },
             { 
-                id: 5, nombre: "JCH MT200", precio: 6600, minimo: 6400, img: "https://i.imgur.com/vXyJ0y8.png", 
-                specs: { "Motor": "200cc Balanceado (Sin vibración)", "Estilo": "Naked / Deportiva", "Tablero": "100% Digital", "Tanque": "14 Litros", "Iluminación": "Full LED Integral", "Transmisión": "5 Velocidades", "Llantas": "Aleación deportiva" } 
+                id: 5, 
+                nombre: "JCH MT200", 
+                precio: 6600, 
+                minimo: 6400, 
+                img: "https://placehold.co/500x300/gray/white?text=JCH+MT200", 
+                specs: { 
+                    "Motor": "200cc CGB Balanceado (Sin vibración)", 
+                    "Estilo": "Naked / Deportiva Urbana", 
+                    "Potencia": "16 HP (aprox)",
+                    "Tablero": "100% Digital Multicolor", 
+                    "Iluminación": "Full LED Integral (Faros y Direccionales)", 
+                    "Tanque": "14 Litros (Gran autonomía)", 
+                    "Transmisión": "5 Velocidades Sincronizadas", 
+                    "Llantas": "Aleación deportiva de aluminio",
+                    "Seguridad": "Frenos de disco lobulados del/post"
+                } 
             },
             { 
-                id: 6, nombre: "REZZIO RZ200 LITHIUM", precio: 9100, minimo: 8900, img: "https://i.imgur.com/V6GoW8l.png", 
-                specs: { "Motor": "200cc Inyección o Carburada", "Refrigeración": "Radiador de Aceite", "Transmisión": "6 Velocidades", "Tanque": "15 Litros", "Tecnología": "Encendido a distancia / Alarma", "Frenos": "Doble disco delantero", "Velocidad Max": "125 km/h" } 
+                id: 6, 
+                nombre: "REZZIO RZ200 LITHIUM", 
+                precio: 9100, 
+                minimo: 8900, 
+                img: "https://i.imgur.com/V6GoW8l.png", 
+                specs: { 
+                    "Motor": "200cc OHC Cadenero Alta Gama", 
+                    "Refrigeración": "Radiador de Aceite (Oil Cooled)", 
+                    "Transmisión": "6 Velocidades (Sexta para carretera)", 
+                    "Tanque": "15 Litros Aerodinámico", 
+                    "Tecnología": "Encendido a distancia, Alarma, Tablero Digital", 
+                    "Frenos": "Doble Disco Delantero / Disco Trasero", 
+                    "Velocidad Max": "125 km/h",
+                    "Iluminación": "Ojos de Ángel LED + Proyector",
+                    "Extras": "Sliders de fábrica, Asiento antideslizante"
+                } 
             },
             { 
-                id: 7, nombre: "RONCO TRAKTOR 300P", precio: 14700, minimo: 14500, img: "https://i.imgur.com/PGITm8B.jpeg?1", 
-                specs: { "Motor": "300cc OHV enfriado por Agua", "Carga Útil": "1000 kg - 1200 kg", "Transmisión": "Mecánica 5 vel + Reversa", "Tanque": "16 Litros", "Tracción": "Cardán con Rooster (Dual)", "Llantas": "Posteriores Doble Llanta", "Extras": "Tolva levadiza hidráulica (opcional)" } 
+                id: 7, 
+                nombre: "RONCO TRAKTOR 300P", 
+                precio: 14700, 
+                minimo: 14500, 
+                img: "https://i.imgur.com/PGITm8B.jpeg?1", 
+                specs: { 
+                    "Motor": "300cc Super Heavy Duty", 
+                    "Refrigeración": "Radiador de Agua (Water Cooled)", 
+                    "Carga Útil": "Soporta entre 1000 kg y 1200 kg", 
+                    "Transmisión": "Mecánica 5 vel + Reversa", 
+                    "Tracción": "Cardán + Rooster (Dual Force/Ruster)", 
+                    "Chasis": "Reforzado Doble Viga",
+                    "Suspensión": "Muelles maestros reforzados + Amortiguador",
+                    "Llantas": "Posteriores Doble Llanta (4 ruedas atrás)", 
+                    "Tolva": "Levadiza sistema Hidráulico (Volquete)" 
+                } 
             }
         ];
 
@@ -311,8 +423,35 @@
             document.getElementById('resultadoTotal').innerText = formatearMoneda(totalFinalReal);
         }
 
+        /* --- LÓGICA DE CONTACTOS (NUEVO) --- */
+        async function abrirAgenda() {
+            const props = ['name', 'tel'];
+            const opts = { multiple: false };
+
+            try {
+                // Intentamos abrir el selector nativo de contactos
+                const contacts = await navigator.contacts.select(props, opts);
+                
+                if (contacts.length) {
+                    let numero = contacts[0].tel[0];
+                    // Limpiamos el número (quitamos espacios, guiones y +51 si lo tiene)
+                    numero = numero.replace(/\D/g,''); 
+                    if(numero.startsWith('51')) { numero = numero.substring(2); }
+                    
+                    document.getElementById('whatsappNumber').value = numero;
+                }
+            } catch (ex) {
+                // Si el navegador no lo soporta o el usuario cancela
+                console.log(ex);
+                alert("Tu dispositivo no soporta la selección automática de contactos. Por favor escribe el número manualmente.");
+            }
+        }
+
         function enviarPropuesta() {
             let numero = document.getElementById('whatsappNumber').value.trim();
+            // Limpieza básica por si pegaron el número con espacios
+            numero = numero.replace(/\s/g, '');
+            
             if (numero.length < 9) { alert("Por favor ingresa un número válido."); return; }
 
             let moto = document.getElementById('nombreMotoSel').innerText.replace("Cotizando: ", "");
@@ -330,6 +469,7 @@
             mensaje += `💵 *Inicial:* S/. ${inicial}%0A`;
             mensaje += `📅 *Plan:* ${cuotas} Cuotas (${textoFrecuencia})%0A`;
             mensaje += `✅ *Cuota a Pagar:* S/. ${valorCuota}%0A`;
+            mensaje += `🏁 *Total Final:* S/. ${totalFinal}%0A%0A`;
             mensaje += `📍 *Visítanos y llévatela hoy mismo!*`;
 
             let url = `https://wa.me/51${numero}?text=${mensaje}`;
